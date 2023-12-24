@@ -29,6 +29,8 @@ pub struct Config {
     /// Use Sixel protocol if the terminal supports it. Defaults to true.
     #[cfg(feature = "sixel")]
     pub use_sixel: bool,
+    /// Print to stderr instead of stdout. Defaults to false.
+    pub use_stderr: bool,
 }
 
 impl std::default::Default for Config {
@@ -46,6 +48,7 @@ impl std::default::Default for Config {
             use_iterm: true,
             #[cfg(feature = "sixel")]
             use_sixel: true,
+            use_stderr: false,
         }
     }
 }

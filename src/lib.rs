@@ -39,7 +39,7 @@ mod config;
 mod error;
 mod printer;
 mod utils;
-
+mod writer;
 pub use config::Config;
 pub use error::{ViuError, ViuResult};
 pub use printer::{get_kitty_support, is_iterm_supported, resize, KittySupport};
@@ -72,7 +72,9 @@ pub use printer::is_sixel_supported;
 /// print(&img, &Config::default()).expect("Image printing failed.");
 /// ```
 pub fn print(img: &DynamicImage, config: &Config) -> ViuResult<(u32, u32)> {
-    let mut stdout = std::io::stdout();
+    let mut stdout = &mut writer::Writer {
+        use_stderr: config.use_stderr,
+    };
     if config.restore_cursor {
         execute!(&mut stdout, SavePosition)?;
     }
@@ -101,7 +103,9 @@ pub fn print(img: &DynamicImage, config: &Config) -> ViuResult<(u32, u32)> {
 /// print_from_file("img.jpg", &conf).expect("Image printing failed.");
 /// ```
 pub fn print_from_file<P: AsRef<Path>>(filename: P, config: &Config) -> ViuResult<(u32, u32)> {
-    let mut stdout = std::io::stdout();
+    let mut stdout = writer::Writer {
+        use_stderr: config.use_stderr,
+    };
     if config.restore_cursor {
         execute!(&mut stdout, SavePosition)?;
     }
