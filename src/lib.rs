@@ -38,12 +38,15 @@ use printer::{Printer, PrinterType};
 mod config;
 mod error;
 mod printer;
+mod string_writer;
 mod utils;
 mod writer;
 pub use config::Config;
 pub use error::{ViuError, ViuResult};
 pub use printer::{get_kitty_support, is_iterm_supported, resize, KittySupport};
+use string_writer::StringWriter;
 pub use utils::terminal_size;
+pub use writer::Writer;
 
 #[cfg(feature = "sixel")]
 pub use printer::is_sixel_supported;
@@ -72,9 +75,7 @@ pub use printer::is_sixel_supported;
 /// print(&img, &Config::default()).expect("Image printing failed.");
 /// ```
 pub fn print(img: &DynamicImage, config: &Config) -> ViuResult<(u32, u32)> {
-    let mut stdout = &mut writer::Writer {
-        use_stderr: config.use_stderr,
-    };
+    let mut stdout = &mut Writer::from_config(config);
     if config.restore_cursor {
         execute!(&mut stdout, SavePosition)?;
     }
@@ -86,6 +87,41 @@ pub fn print(img: &DynamicImage, config: &Config) -> ViuResult<(u32, u32)> {
     };
 
     Ok((w, h))
+}
+
+/// Default printing method. Uses either iTerm or Kitty graphics protocol, if supported,
+/// and half blocks otherwise.
+///
+/// Check the [Config] struct for all customization options.
+/// ## Example
+/// The snippet below reads all of stdin, decodes it with the [`image`] crate
+/// and prints it to the terminal. The image will also be resized to fit in the terminal.
+///
+/// ```no_run
+/// use std::io::{stdin, Read};
+/// use viuer::{Config, print};
+///
+/// let stdin = stdin();
+/// let mut handle = stdin.lock();
+///
+/// let mut buf: Vec<u8> = Vec::new();
+/// let _ = handle
+///     .read_to_end(&mut buf)
+///     .expect("Could not read until EOF.");
+///
+/// let img = image::load_from_memory(&buf).expect("Data from stdin could not be decoded.");
+/// print(&img, &Config::default()).expect("Image printing failed.");
+/// ```
+pub fn to_ansi(img: &DynamicImage, config: &Config) -> ViuResult<String> {
+    let stdout = &mut StringWriter::new();
+
+    let (w, h) = choose_printer(config).print(stdout, img, config)?;
+
+    // if config.restore_cursor {
+    //     execute!(&mut stdout, RestorePosition)?;
+    // };
+
+    Ok(stdout.read().to_string())
 }
 
 /// Helper method that reads a file, tries to decode it and prints it.
@@ -103,9 +139,7 @@ pub fn print(img: &DynamicImage, config: &Config) -> ViuResult<(u32, u32)> {
 /// print_from_file("img.jpg", &conf).expect("Image printing failed.");
 /// ```
 pub fn print_from_file<P: AsRef<Path>>(filename: P, config: &Config) -> ViuResult<(u32, u32)> {
-    let mut stdout = writer::Writer {
-        use_stderr: config.use_stderr,
-    };
+    let mut stdout = Writer::from_config(config);
     if config.restore_cursor {
         execute!(&mut stdout, SavePosition)?;
     }

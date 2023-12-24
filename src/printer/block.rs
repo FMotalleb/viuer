@@ -5,7 +5,7 @@ use crate::Config;
 use ansi_colours::ansi256_from_rgb;
 use image::{DynamicImage, GenericImageView, Rgba};
 use std::io::Write;
-use termcolor::{BufferedStandardStream, Color, ColorChoice, ColorSpec, WriteColor};
+use termcolor::{BufferedStandardStream, Color, ColorSpec, WriteColor};
 
 use crossterm::cursor::MoveRight;
 use crossterm::execute;
@@ -26,7 +26,10 @@ impl Printer for BlockPrinter {
         img: &DynamicImage,
         config: &Config,
     ) -> ViuResult<(u32, u32)> {
-        let mut stream = BufferedStandardStream::stdout(ColorChoice::Always);
+        let mut stream = match config.use_stderr {
+            true => BufferedStandardStream::stderr(termcolor::ColorChoice::Always),
+            false => BufferedStandardStream::stdout(termcolor::ColorChoice::Always),
+        };
         print_to_writecolor(&mut stream, img, config)
     }
 }

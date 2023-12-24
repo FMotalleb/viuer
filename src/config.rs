@@ -1,4 +1,4 @@
-use crate::utils;
+use crate::{utils, writer::Writer};
 
 /// Configuration struct to customize printing behaviour.
 pub struct Config {
@@ -31,6 +31,8 @@ pub struct Config {
     pub use_sixel: bool,
     /// Print to stderr instead of stdout. Defaults to false.
     pub use_stderr: bool,
+    /// Override writer method
+    pub override_writer: Option<Writer>,
 }
 
 impl std::default::Default for Config {
@@ -49,6 +51,7 @@ impl std::default::Default for Config {
             #[cfg(feature = "sixel")]
             use_sixel: true,
             use_stderr: false,
+            override_writer: None,
         }
     }
 }
