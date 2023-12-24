@@ -59,7 +59,7 @@ impl Printer for SixelPrinter {
 // see https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Sixel-Graphics
 // and https://vt100.net/docs/vt510-rm/DA1.html
 fn check_device_attrs() -> ViuResult<bool> {
-    let mut term = Term::stdout();
+    let mut term = Term::stderr();
 
     write!(&mut term, "\x1b[c")?;
     term.flush()?;

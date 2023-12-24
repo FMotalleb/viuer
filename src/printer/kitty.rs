@@ -85,10 +85,10 @@ fn has_local_support() -> ViuResult {
             "Could not convert path to &str"
         ))?)
     );
-    std::io::stdout().flush()?;
+    std::io::stderr().flush()?;
 
     // collect Kitty's response after the query
-    let term = Term::stdout();
+    let term = Term::stderr();
     let mut response = Vec::new();
 
     // TODO: could use a queue of length 3
