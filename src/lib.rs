@@ -114,8 +114,7 @@ pub fn print(img: &DynamicImage, config: &Config) -> ViuResult<(u32, u32)> {
 /// ```
 pub fn to_ansi(img: &DynamicImage, config: &Config) -> ViuResult<String> {
     let stdout = &mut StringWriter::new();
-
-    let (w, h) = choose_printer(config).print(stdout, img, config)?;
+    let _ = printer::BlockPrinter::write(stdout, img, config);
 
     // if config.restore_cursor {
     //     execute!(&mut stdout, RestorePosition)?;

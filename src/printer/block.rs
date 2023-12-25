@@ -17,7 +17,15 @@ const CHECKERBOARD_BACKGROUND_LIGHT: (u8, u8, u8) = (153, 153, 153);
 const CHECKERBOARD_BACKGROUND_DARK: (u8, u8, u8) = (102, 102, 102);
 
 pub struct BlockPrinter;
-
+impl BlockPrinter {
+    pub fn write(
+        stdout: &mut impl WriteColor,
+        img: &DynamicImage,
+        config: &Config,
+    ) -> ViuResult<(u32, u32)> {
+        print_to_writecolor(stdout, img, config)
+    }
+}
 impl Printer for BlockPrinter {
     fn print(
         &self,
